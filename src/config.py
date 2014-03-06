@@ -5,9 +5,9 @@ Includes imports and other configuration options
 author: chris
 """
 
-import numpy as np
 import os
 import time
+
 
 samples = os.path.join("..","samples")
 

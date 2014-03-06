@@ -6,6 +6,7 @@ author: chris
 
 from config import *
 from scipy.io import wavfile
+import numpy as np
 
 @debug
 def loadAudio(filename):
@@ -22,7 +23,8 @@ def loadAudio(filename):
 	srate,data = wavfile.read(os.path.join(samples,filename))
 	return srate,data
 
-def frame_signal(signal, frame_length, frame_step, a_func = lambda x:np.ones(size=(1,x))):
+@debug
+def frame_signal(signal, frame_length, frame_step, a_func = lambda x:np.ones(shape=(1,x))):
 	"""
 	Adapted from James Lyons 2012
 
@@ -37,17 +39,96 @@ def frame_signal(signal, frame_length, frame_step, a_func = lambda x:np.ones(siz
 	:returns 			- an array of frames
 	"""
 
-	signal_length = len(signal)
-	num_frames = 1 if signal_length <= frame_length else np.ceil((signal_length - frame_length)/frame_step)
-	
+	signal_length = signal.shape[0]
+	num_frames = 1 if signal_length <= frame_length else 1 + np.ceil((1.0 * (signal_length - frame_length))/frame_step)
+
 	padded_length = (num_frames - 1) * frame_step + frame_length
-	padded_signal = np.concatenate((signal, np.zeros(size = (padded_length - signal_length,))))
+	padded_signal = np.concatenate((signal, np.zeros(shape = (padded_length - signal_length,))))
 
 	indices = np.tile(np.arange(0,frame_length), (num_frames,1)) + np.tile(np.arange(0,num_frames*frame_step,frame_step),(frame_length,1)).T
-	indices = indicies.astype(np.int32)
+	indices = indices.astype(np.int32)
 	
-	frames = padded_signal[indicies]
+	frames = padded_signal[indices]
 	window = np.tile(a_func(frame_length),(num_frames,1))
 
 	return frames * window
+
+ 
+def deframesig(frames,siglen,frame_len,frame_step,winfunc=lambda x:np.ones((1,x))):
+    """Does overlap-add procedure to undo the action of framesig. 
+
+    :param frames: the array of frames.
+    :param siglen: the length of the desired signal, use 0 if unknown. Output will be truncated to siglen samples.    
+    :param frame_len: length of each frame measured in samples.
+    :param frame_step: number of samples after the start of the previous frame that the next frame should begin.
+    :param winfunc: the analysis window to apply to each frame. By default no window is applied.    
+    :returns: a 1-D signal.
+    """
+    frame_len = round(frame_len)
+    frame_step = round(frame_step)
+    numframes = np.shape(frames)[0]
+    assert np.shape(frames)[1] == frame_len, '"frames" matrix is wrong size, 2nd dim is not equal to frame_len'
+ 
+    indices = np.tile(np.arange(0,frame_len),(numframes,1)) + np.tile(np.arange(0,numframes*frame_step,frame_step),(frame_len,1)).T
+    indices = np.array(indices,dtype=np.int32)
+    padlen = (numframes-1)*frame_step + frame_len   
+    
+    if siglen <= 0: siglen = padlen
+    
+    rec_signal = np.zeros((1,padlen))
+    window_correction = np.zeros((1,padlen))
+    win = winfunc(frame_len)
+    
+    for i in range(0,numframes):
+        window_correction[indices[i,:]] = window_correction[indices[i,:]] + win + 1e-15 #add a little bit so it is never zero
+        rec_signal[indices[i,:]] = rec_signal[indices[i,:]] + frames[i,:]
+        
+    rec_signal = rec_signal/window_correction
+    return rec_signal[0:siglen]
+    
+def magspec(frames,NFFT):
+    """Compute the magnitude spectrum of each frame in frames. If frames is an NxD matrix, output will be NxNFFT. 
+
+    :param frames: the array of frames. Each row is a frame.
+    :param NFFT: the FFT length to use. If NFFT > frame_len, the frames are zero-padded. 
+    :returns: If frames is an NxD matrix, output will be NxNFFT. Each row will be the magnitude spectrum of the corresponding frame.
+    """    
+    complex_spec = np.fft.rfft(frames,NFFT)
+    return np.absolute(complex_spec)
+          
+def powspec(frames,NFFT):
+    """Compute the power spectrum of each frame in frames. If frames is an NxD matrix, output will be NxNFFT. 
+
+    :param frames: the array of frames. Each row is a frame.
+    :param NFFT: the FFT length to use. If NFFT > frame_len, the frames are zero-padded. 
+    :returns: If frames is an NxD matrix, output will be NxNFFT. Each row will be the power spectrum of the corresponding frame.
+    """    
+    return 1.0/NFFT * np.square(magspec(frames,NFFT))
+    
+def logpowspec(frames,NFFT,norm=1):
+    """Compute the log power spectrum of each frame in frames. If frames is an NxD matrix, output will be NxNFFT. 
+
+    :param frames: the array of frames. Each row is a frame.
+    :param NFFT: the FFT length to use. If NFFT > frame_len, the frames are zero-padded. 
+    :param norm: If norm=1, the log power spectrum is normalised so that the max value (across all frames) is 1.
+    :returns: If frames is an NxD matrix, output will be NxNFFT. Each row will be the log power spectrum of the corresponding frame.
+    """    
+    ps = powspec(frames,NFFT);
+    ps[ps<=1e-30] = 1e-30
+    lps = 10*np.log10(ps)
+    if norm:
+        return lps - np.max(lps)
+    else:
+        return lps
+    
+def preemphasis(signal,coeff=0.95):
+    """perform preemphasis on the input signal.
+    
+    :param signal: The signal to filter.
+    :param coeff: The preemphasis coefficient. 0 is no filter, default is 0.95.
+    :returns: the filtered signal.
+    """    
+    return np.append(signal[0],signal[1:]-coeff*signal[:-1])
+
+
 
