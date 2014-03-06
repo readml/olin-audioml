@@ -10,7 +10,9 @@ author: chris
 import numpy as np
 import signal_processing as sp
 from scipy.fftpack import dct
-    
+from config import *
+
+@debug
 def mfcc(signal,samplerate=16000,winlen=0.025,winstep=0.01,numcep=13,
           nfilt=26,nfft=512,lowfreq=0,highfreq=None,preemph=0.97,ceplifter=22,appendEnergy=True):
     """Compute MFCC features from an audio signal.
@@ -36,6 +38,7 @@ def mfcc(signal,samplerate=16000,winlen=0.025,winstep=0.01,numcep=13,
     if appendEnergy: feat[:,0] = np.log(energy) # replace first cepstral coefficient with log of frame energy
     return feat
 
+@debug
 def fbank(signal,samplerate=16000,winlen=0.025,winstep=0.01,
           nfilt=26,nfft=512,lowfreq=0,highfreq=None,preemph=0.97):
     """Compute Mel-filterbank energy features from an audio signal.
@@ -62,6 +65,7 @@ def fbank(signal,samplerate=16000,winlen=0.025,winstep=0.01,
     feat = np.dot(pspec,fb.T) # compute the filterbank energies
     return feat,energy
 
+@debug
 def logfbank(signal,samplerate=16000,winlen=0.025,winstep=0.01,
           nfilt=26,nfft=512,lowfreq=0,highfreq=None,preemph=0.97):
     """Compute log Mel-filterbank energy features from an audio signal.
@@ -80,6 +84,7 @@ def logfbank(signal,samplerate=16000,winlen=0.025,winstep=0.01,
     feat,energy = fbank(signal,samplerate,winlen,winstep,nfilt,nfft,lowfreq,highfreq,preemph)
     return np.log(feat)
 
+@debug
 def ssc(signal,samplerate=16000,winlen=0.025,winstep=0.01,
           nfilt=26,nfft=512,lowfreq=0,highfreq=None,preemph=0.97):
     """Compute Spectral Subband Centroid features from an audio signal.
@@ -105,7 +110,8 @@ def ssc(signal,samplerate=16000,winlen=0.025,winstep=0.01,
     R = np.tile(np.linspace(1,samplerate/2,np.size(pspec,1)),(np.size(pspec,0),1))
     
     return np.dot(pspec*R,fb.T) / feat
-    
+
+@debug
 def hz2mel(hz):
     """Convert a value in Hertz to Mels
 
@@ -113,7 +119,8 @@ def hz2mel(hz):
     :returns: a value in Mels. If an array was passed in, an identical sized array is returned.
     """
     return 2595 * np.log10(1+hz/700.0)
-    
+
+@debug    
 def mel2hz(mel):
     """Convert a value in Mels to Hertz
 
@@ -122,6 +129,7 @@ def mel2hz(mel):
     """
     return 700*(10**(mel/2595.0)-1)
 
+@debug
 def get_filterbanks(nfilt=20,nfft=512,samplerate=16000,lowfreq=0,highfreq=None):
     """Compute a Mel-filterbank. The filters are stored in the rows, the columns correspond
     to fft bins. The filters are returned as an array of size nfilt * (nfft/2 + 1)
@@ -150,7 +158,8 @@ def get_filterbanks(nfilt=20,nfft=512,samplerate=16000,lowfreq=0,highfreq=None):
         for i in xrange(int(bin[j+1]),int(bin[j+2])):
             fbank[j,i] = (bin[j+2]-i)/(bin[j+2]-bin[j+1])
     return fbank                 
-    
+
+@debug
 def lifter(cepstra,L=22):
     """Apply a cepstral lifter the the matrix of cepstra. This has the effect of increasing the
     magnitude of the high frequency DCT coeffs.

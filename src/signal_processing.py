@@ -53,7 +53,7 @@ def frame_signal(signal, frame_length, frame_step, a_func = lambda x:np.ones(sha
 
 	return frames * window
 
- 
+@debug
 def deframesig(frames,siglen,frame_len,frame_step,winfunc=lambda x:np.ones((1,x))):
     """Does overlap-add procedure to undo the action of framesig. 
 
@@ -85,7 +85,8 @@ def deframesig(frames,siglen,frame_len,frame_step,winfunc=lambda x:np.ones((1,x)
         
     rec_signal = rec_signal/window_correction
     return rec_signal[0:siglen]
-    
+   
+@debug
 def magspec(frames,NFFT):
     """Compute the magnitude spectrum of each frame in frames. If frames is an NxD matrix, output will be NxNFFT. 
 
@@ -95,7 +96,8 @@ def magspec(frames,NFFT):
     """    
     complex_spec = np.fft.rfft(frames,NFFT)
     return np.absolute(complex_spec)
-          
+
+@debug
 def powspec(frames,NFFT):
     """Compute the power spectrum of each frame in frames. If frames is an NxD matrix, output will be NxNFFT. 
 
@@ -104,7 +106,8 @@ def powspec(frames,NFFT):
     :returns: If frames is an NxD matrix, output will be NxNFFT. Each row will be the power spectrum of the corresponding frame.
     """    
     return 1.0/NFFT * np.square(magspec(frames,NFFT))
-    
+
+@debug
 def logpowspec(frames,NFFT,norm=1):
     """Compute the log power spectrum of each frame in frames. If frames is an NxD matrix, output will be NxNFFT. 
 
@@ -120,7 +123,8 @@ def logpowspec(frames,NFFT,norm=1):
         return lps - np.max(lps)
     else:
         return lps
-    
+
+@debug
 def preemphasis(signal,coeff=0.95):
     """perform preemphasis on the input signal.
     
