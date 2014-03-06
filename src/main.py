@@ -10,15 +10,22 @@ import numpy as np
 import signal_processing as sp
 import features as fs
 
+"""
+Model Notes:
+Gaussian Mixture model?
+	Separate models for each speaker. 
+"""
+
 @debug
-def getFeatures(filename):
+def getFeatures(signal, rate):
 	"""
 	Extracts Important Vocal Features
 	"""
-	(rate,signal) = sp.loadAudio(filename)
-	mfcc_feat = fs.mfcc(signal,rate)
-	fbank_feat = fs.logfbank(signal,rate)
-	return fbank_feat
+	if signal.shape[0] > mem_cut_off:
+		mfcc,fbank = getFeatures(signal[mem_cut_off:], rate)
+		return np.concatenate((fs.mfcc(signal[:mem_cut_off],rate),mfcc)), np.concatenate((fs.logfbank(signal,rate),fbank))
+	else:
+		return fs.mfcc(signal,rate), fs.logfbank(signal,rate)
 
 @debug
 def formatForTraining(data, voice):
@@ -34,12 +41,12 @@ def main():
 	voices = []
 	for i,afile in enumerate(os.listdir(samples_path)):
 		voices.append(i)
-		if int(afile[:-4]) <= 3000:
-			formatForTraining(getFeatures(afile), i)
-		else:
-			#TODO - split larger audio files down to smaller ones
-			pass
-		raw_input()
+		rate,signal = sp.loadAudio(afile)
+		mfcc, fbank = getFeatures(signal,rate)
+		dataM = formatForTraining(mfcc, i)
+		dataF = formatForTraining(fbank, i)
+		print dataM.shape
+		print dataF.shape
 	
 
 if __name__ == "__main__":

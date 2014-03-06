@@ -8,8 +8,8 @@ author: chris
 import os
 import time
 
-
 samples_path = os.path.join("..","samples")
+mem_cut_off = 1500000
 
 """
 * Debug/Timer Wrapper
@@ -20,12 +20,12 @@ author: chris
 """
 def debug(func):
 	def wrapper(*arg, **kwargs):
-		print "======================================="
-		print "Currently Running:",func.func_name
+		# print "======================================="
+		# print "Currently Running:",func.func_name
 		t1 = time.time()
 		res = func(*arg,**kwargs)
 		t2 = time.time()
 		print '%s took %0.3f ms' % (func.func_name, (t2-t1)*1000.0)
-		print "=======================================\n"
+		# print "=======================================\n"
 		return res
 	return wrapper
