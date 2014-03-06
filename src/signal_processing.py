@@ -20,38 +20,37 @@ def loadAudio(filename):
 
 	:returns 			- returns sample rate, numpy data
 	"""
-	srate,data = wavfile.read(os.path.join(samples,filename))
+	srate,data = wavfile.read(os.path.join(samples_path,filename))
 	return srate,data
 
 @debug
-def frame_signal(signal, frame_length, frame_step, a_func = lambda x:np.ones(shape=(1,x))):
-	"""
-	Adapted from James Lyons 2012
+def framesig(sig,frame_len,frame_step,winfunc=lambda x:np.ones((1,x))):
+    """Frame a signal into overlapping frames.
 
-	Description:
-	Frames a signal into overlapping frames.
-
-	:param signal 		- the input audio signal 
-	:param frame_length - the length of each frame (in samples)
-	:param frame_step 	- number of samples for each step
-	:param a_func		- analysis window to apply each frame
-
-	:returns 			- an array of frames
-	"""
-
-	signal_length = signal.shape[0]
-	num_frames = 1 if signal_length <= frame_length else 1 + np.ceil((1.0 * (signal_length - frame_length))/frame_step)
-
-	padded_length = (num_frames - 1) * frame_step + frame_length
-	padded_signal = np.concatenate((signal, np.zeros(shape = (padded_length - signal_length,))))
-
-	indices = np.tile(np.arange(0,frame_length), (num_frames,1)) + np.tile(np.arange(0,num_frames*frame_step,frame_step),(frame_length,1)).T
-	indices = indices.astype(np.int32)
-	
-	frames = padded_signal[indices]
-	window = np.tile(a_func(frame_length),(num_frames,1))
-
-	return frames * window
+    :param sig: the audio signal to frame.
+    :param frame_len: length of each frame measured in samples.
+    :param frame_step: number of samples after the start of the previous frame that the next frame should begin.
+    :param winfunc: the analysis window to apply to each frame. By default no window is applied.    
+    :returns: an array of frames. Size is NUMFRAMES by frame_len.
+    """
+    slen = len(sig)
+    frame_len = round(frame_len)
+    frame_step = round(frame_step)
+    if slen <= frame_len: 
+        numframes = 1
+    else:
+        numframes = 1 + np.ceil((1.0*slen - frame_len)/frame_step)
+        
+    padlen = (numframes-1)*frame_step + frame_len
+    
+    zeros = np.zeros((padlen - slen,))
+    padsignal = np.concatenate((sig,zeros))
+    
+    indices = np.tile(np.arange(0,frame_len),(numframes,1)) + np.tile(np.arange(0,numframes*frame_step,frame_step),(frame_len,1)).T
+    indices = np.array(indices,dtype=np.int32)
+    frames = padsignal[indices]
+    win = np.tile(winfunc(frame_len),(numframes,1))
+    return frames*win
 
 @debug
 def deframesig(frames,siglen,frame_len,frame_step,winfunc=lambda x:np.ones((1,x))):

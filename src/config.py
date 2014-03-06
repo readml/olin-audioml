@@ -9,7 +9,7 @@ import os
 import time
 
 
-samples = os.path.join("..","samples")
+samples_path = os.path.join("..","samples")
 
 """
 * Debug/Timer Wrapper

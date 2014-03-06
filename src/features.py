@@ -57,7 +57,7 @@ def fbank(signal,samplerate=16000,winlen=0.025,winstep=0.01,
     """          
     highfreq= highfreq or samplerate/2
     signal = sp.preemphasis(signal,preemph)
-    frames = sp.frame_signal(signal, winlen*samplerate, winstep*samplerate)
+    frames = sp.framesig(signal, winlen*samplerate, winstep*samplerate)
     pspec = sp.powspec(frames,nfft)
     energy = np.sum(pspec,1) # this stores the total energy in each frame
     
@@ -102,7 +102,7 @@ def ssc(signal,samplerate=16000,winlen=0.025,winstep=0.01,
     """          
     highfreq= highfreq or samplerate/2
     signal = sp.preemphasis(signal,preemph)
-    frames = sp.frame_signal(signal, winlen*samplerate, winstep*samplerate)
+    frames = sp.framesig(signal, winlen*samplerate, winstep*samplerate)
     pspec = sp.powspec(frames,nfft)
     
     fb = get_filterbanks(nfilt,nfft,samplerate)
