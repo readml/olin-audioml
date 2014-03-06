@@ -5,22 +5,22 @@ author: chris
 """
 
 from config import *
-import wave
+from scipy.io import wavfile
 
+@debug
 def loadAudio(filename):
 	"""
 	author: chris
 	Description:
-	Uses wave (python module) to load an audio file
+	Uses scipy (python module) to load an audio file
 
-	:param filename		- relative or abs path to audio file
+	:param filename		- filename of audio file
+						(samples path can be edited in config.py`)
 
-	:returns 			- returns sample rate, total samples
+	:returns 			- returns sample rate, numpy data
 	"""
-	with wave.open(filename, 'rb') as afile:
-		srate = afile.getframerate()
-		tsamples = afile.getnframes()
-	return srate, tsamples
+	srate,data = wavfile.read(os.path.join(samples,filename))
+	return srate,data
 
 def frame_signal(signal, frame_length, frame_step, a_func = lambda x:np.ones(size=(1,x))):
 	"""
