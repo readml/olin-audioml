@@ -34,8 +34,8 @@ def framesig(sig,frame_len,frame_step,winfunc=lambda x:np.ones((1,x))):
     :returns: an array of frames. Size is NUMFRAMES by frame_len.
     """
     slen = len(sig)
-    frame_len = round(frame_len)
-    frame_step = round(frame_step)
+    frame_len = int(frame_len)
+    frame_step = int(frame_step)
     if slen <= frame_len: 
         numframes = 1
     else:
@@ -43,7 +43,7 @@ def framesig(sig,frame_len,frame_step,winfunc=lambda x:np.ones((1,x))):
         
     padlen = (numframes-1)*frame_step + frame_len
     
-    zeros = np.zeros((padlen - slen,))
+    zeros = np.zeros((int(padlen - slen)))
     padsignal = np.concatenate((sig,zeros))
     
     indices = np.tile(np.arange(0,frame_len),(numframes,1)) + np.tile(np.arange(0,numframes*frame_step,frame_step),(frame_len,1)).T
@@ -63,14 +63,14 @@ def deframesig(frames,siglen,frame_len,frame_step,winfunc=lambda x:np.ones((1,x)
     :param winfunc: the analysis window to apply to each frame. By default no window is applied.    
     :returns: a 1-D signal.
     """
-    frame_len = round(frame_len)
-    frame_step = round(frame_step)
+    frame_len = int(frame_len)
+    frame_step = int(frame_step)
     numframes = np.shape(frames)[0]
     assert np.shape(frames)[1] == frame_len, '"frames" matrix is wrong size, 2nd dim is not equal to frame_len'
  
     indices = np.tile(np.arange(0,frame_len),(numframes,1)) + np.tile(np.arange(0,numframes*frame_step,frame_step),(frame_len,1)).T
     indices = np.array(indices,dtype=np.int32)
-    padlen = (numframes-1)*frame_step + frame_len   
+    padlen = int((numframes-1)*frame_step + frame_len)
     
     if siglen <= 0: siglen = padlen
     
