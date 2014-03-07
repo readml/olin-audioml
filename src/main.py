@@ -75,10 +75,21 @@ def splitTraining(data, split= .1):
 	author: chris
 	"""
 	cutoff = int(data.shape[0]*.1)
+	np.random.shuffle(data)
 	X = data[:,:-1]
-	Y = data[:,-1]
+	Y = one_hot(data[:,-1])
 
 	return  X[:-cutoff,:], Y[:-cutoff], X[-cutoff:,:], Y[-cutoff:]
+
+@debug
+def one_hot(array):
+	"""
+	One Hotting class values for classifcation problem
+	"""
+	array = array.flatten().astype("int")
+	output = np.zeros(shape = (len(array),np.max(array) + 1))
+	output[np.arange(len(array)),array] = 1
+	return output
 
 @debug
 def main():
@@ -88,18 +99,24 @@ def main():
 	mTrainX, mTrainY, mTestX, mTestY = splitTraining(dataM)
 	fTrainX, fTrainY, fTestX, fTestY = splitTraining(dataF)
 
-	print mTrainX.shape
-	print mTrainY.shape
-	print mTestX.shape
-	print mTestY.shape
 
-	print fTrainX.shape
-	print fTrainY.shape
-	print fTestX.shape
-	print fTestY.shape
+	# print mTrainX.shape
+	# print mTrainY.shape
+	# print mTestX.shape
+	# print mTestY.shape
 
+	# print fTrainX.shape
+	# print fTrainY.shape
+	# print fTestX.shape
+	# print fTestY.shape
 
-	
+	model = RandomForestClassifier(n_estimators = 300)
+	model.fit(mTrainX, mTrainY)
+
+	prediction =  model.predict(mTestX)
+	accuracy = metrics.accuracy_score(mTestY, prediction)
+
+	print accuracy
 	
 	
 
