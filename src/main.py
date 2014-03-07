@@ -110,13 +110,24 @@ def main():
 	# print fTestX.shape
 	# print fTestY.shape
 
-	model = RandomForestClassifier(n_estimators = 300)
-	model.fit(mTrainX, mTrainY)
+	#MFCC
+	Mmodel = RandomForestClassifier(n_estimators = 300)
+	Mmodel.fit(mTrainX, mTrainY)
 
-	prediction =  model.predict(mTestX)
-	accuracy = metrics.accuracy_score(mTestY, prediction)
+	Mprediction =  Mmodel.predict(mTestX)
+	Maccuracy = metrics.accuracy_score(mTestY, Mprediction)
 
-	print accuracy
+
+	#FBank
+	Fmodel = RandomForestClassifier(n_estimators = 300)
+	Fmodel.fit(mTrainX, mTrainY)
+
+	Fprediction =  Fmodel.predict(mTestX)
+	Faccuracy = metrics.accuracy_score(mTestY, Fprediction)
+
+	
+	print "MFCC", Maccuracy
+	print "FBANK", Faccuracy
 	
 	
 
