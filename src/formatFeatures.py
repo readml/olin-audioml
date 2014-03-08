@@ -67,7 +67,7 @@ def getDataSet(files):
 	return voices, dataM, dataF
 
 @debug
-def splitTraining(data, split= .1):
+def splitTraining(data, split= .1, onehot = True):
 	"""
 	Splits the data into training and target features for testing and training sets
 	Takes in the training:target feature array and splits based on split ratio (0<1)
@@ -77,7 +77,10 @@ def splitTraining(data, split= .1):
 	cutoff = int(data.shape[0]*.1)
 	np.random.shuffle(data)
 	X = data[:,:-1]
-	Y = one_hot(data[:,-1])
+	if onehot:
+		Y = one_hot(data[:,-1])
+	else:
+		Y = data[:,-1]
 
 	return  X[:-cutoff,:], Y[:-cutoff], X[-cutoff:,:], Y[-cutoff:]
 
