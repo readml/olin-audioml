@@ -5,11 +5,12 @@ author: chris
 
 from config import *
 import formatFeatures as FF
+import numpy as np
 
 from sklearn.mixture import GMM
 import os
 
-def score(predict,real):
+def score(predict, real):
 	return 1 #TODO
 
 if __name__ == "__main__":
@@ -19,11 +20,12 @@ if __name__ == "__main__":
 	mTrainX, mTrainY, mTestX, mTestY = FF.splitTraining(dataM, onehot = False)     
 	fTrainX, fTrainY, fTestX, fTestY = FF.splitTraining(dataF, onehot = False)
 
-	model = GMM(n_components = len(voices))
-	model.fit(mTrainX)
-	print model.weights_
+	model = GMM()
+	model.fit(fTrainX)
 
-	array = model.predict(mTestX)
-	score(array, voices)
+	predict = model.predict_proba(fTestX)
+	print predict
+	score(predict, fTestY)
+
 
 
