@@ -31,10 +31,10 @@ def getFeatures(signal, rate):
 	author: chris
 	"""
 	if signal.shape[0] > mem_cut_off:
-		mfcc = getFeatures(signal[mem_cut_off:], rate)
-		return np.concatenate((fs.mfcc(signal[:mem_cut_off],rate),mfcc))
+		mfcc,fbank = getFeatures(signal[mem_cut_off:], rate)
+		return np.concatenate((fs.mfcc(signal[:mem_cut_off],rate),mfcc)), np.concatenate((fs.logfbank(signal,rate),fbank))
 	else:
-		return fs.mfcc(signal,rate)#, fs.logfbank(signal,rate)
+		return fs.mfcc(signal,rate), fs.logfbank(signal,rate)
 
 @debug
 def formatForTraining(data, voice):
@@ -56,14 +56,17 @@ def getDataSet(files):
 	author: chris
 	"""
 	dataM = np.zeros(shape=(1,14))
+	dataF = np.zeros(shape=(1,27))
 	voices = []
 	for i,afile in enumerate(files):
-		print afile
+		if i >= 4:
+			break
 		voices.append(i)
 		rate,signal = sp.loadAudio(afile)
-		mfcc = getFeatures(signal,rate)
+		mfcc, fbank = getFeatures(signal,rate)
 		dataM = np.concatenate((dataM, formatForTraining(mfcc,i)), axis = 0) 
-	return voices, dataM
+		dataF = np.concatenate((dataF, formatForTraining(fbank, i)), axis = 0)
+	return voices, dataM, dataF
 
 @debug
 def extractFeatures(afile):
@@ -71,8 +74,8 @@ def extractFeatures(afile):
 	Extracts Feature from audio file
 	"""
 	rate,signal = sp.loadAudio(afile)
-	mfcc = getFeatures(signal,rate)
-	return mfcc
+	mfcc, fbank = getFeatures(signal,rate)
+	return mfcc, fbank
 	
 @debug
 def splitTraining(data, split= .1, onehot = True):
@@ -104,17 +107,23 @@ def one_hot(array):
 
 @debug
 def main():
-	voices,dataM = getDataSet(os.listdir(samples_path))
+	voices,dataM,dataF = getDataSet(os.listdir(samples_path))
 
 	#Getting training and testing data
 	mTrainX, mTrainY, mTestX, mTestY = splitTraining(dataM)
+	fTrainX, fTrainY, fTestX, fTestY = splitTraining(dataF)
 
 
 	# print mTrainX.shape
 	# print mTrainY.shape
 	# print mTestX.shape
 	# print mTestY.shape
-	
+
+	# print fTrainX.shape
+	# print fTrainY.shape
+	# print fTestX.shape
+	# print fTestY.shape
+
 	#MFCC
 	Mmodel = RandomForestClassifier(n_estimators = 300)
 	Mmodel.fit(mTrainX, mTrainY)
@@ -122,7 +131,18 @@ def main():
 	Mprediction =  Mmodel.predict(mTestX)
 	Maccuracy = metrics.accuracy_score(mTestY, Mprediction)
 
+
+	#FBank
+	Fmodel = RandomForestClassifier(n_estimators = 300)
+	Fmodel.fit(mTrainX, mTrainY)
+
+	Fprediction =  Fmodel.predict(mTestX)
+	Faccuracy = metrics.accuracy_score(mTestY, Fprediction)
+
+	
 	print "MFCC", Maccuracy
+	print "FBANK", Faccuracy
+	
 	
 
 if __name__ == "__main__":
