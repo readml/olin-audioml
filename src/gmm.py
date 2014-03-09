@@ -15,9 +15,9 @@ def score(predict,real):
 if __name__ == "__main__":
 	voices,dataM,dataF = FF.getDataSet(os.listdir(samples_path))
 
-    #Getting training and testing data     mTrainX, mTrainY, mTestX, mTestY =
-FF.splitTraining(dataM, onehot = False)     fTrainX, fTrainY, fTestX, fTestY =
-FF.splitTraining(dataF, onehot = False)
+    #Getting training and testing data     
+	mTrainX, mTrainY, mTestX, mTestY = FF.splitTraining(dataM, onehot = False)     
+	fTrainX, fTrainY, fTestX, fTestY = FF.splitTraining(dataF, onehot = False)
 
 	model = GMM(n_components = len(voices))
 	model.fit(mTrainX)
