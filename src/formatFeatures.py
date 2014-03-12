@@ -55,7 +55,7 @@ def getDataSet(files):
 
 	author: chris
 	"""
-	dataM = np.zeros(shape=(1,14))
+	dataM = np.zeros(shape=(1,14))	
 	dataF = np.zeros(shape=(1,27))
 	voices = []
 	for i,afile in enumerate(files):

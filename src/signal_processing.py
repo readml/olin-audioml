@@ -135,3 +135,5 @@ def preemphasis(signal,coeff=0.95):
 
 
 
+if __name__ == "__main__":
+    print loadAudio("19.wav")[1].shape
