@@ -7,7 +7,6 @@ import pandas as pd
 import formatFeatures as FF
 
 from sklearn.mixture import GMM
-from sklearn.preprocessing import OneHotEncoder
 
 @debug
 def openAudioInputStream():
@@ -55,9 +54,15 @@ def createTrainingData(inputData):
 		dataF = np.concatenate((dataF, FF.formatForTraining(fbank, i)), axis = 0)
 	return dataM, dataF
 
-
-
-dataF = np.concatenate((dataF, formatForTraining(fbank, i)), axis = 0)
+@debug
+def one_hot(array):
+	"""
+	One Hotting class values for classifcation problem
+	"""
+	array = array.flatten().astype("int")
+	output = np.zeros(shape = (len(array),np.max(array) + 1))
+	output[np.arange(len(array)),array] = 1
+	return output
 
 
 
@@ -76,7 +81,7 @@ if __name__ == "__main__":
 		if command == "m":
 			model = GMM(len(voices))
 			mfcc,fbank = createTrainingData(data)
-			model.fit(mfcc[:,:-1], OneHotEncoder(mfcc[:,-1]))
+			model.fit(mfcc[:,:-1], one_hot(mfcc[:,-1]))
 			print 'Ready to test'
 			while raw_input() != "q":
 				testData = recordAudio(inp, 5)
