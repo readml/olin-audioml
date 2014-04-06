@@ -52,12 +52,4 @@ if __name__ == "__main__":
 	model.fit(mTrainX)
 
 	predict = model.predict(mTestX)
-	#print score(predict, mTestY, len(voices))
-
-	# a = np.array([0,1,1,2])
-	# b = np.array([0,1,2,1])
-
-	# print score(a,b,3)
-
-
-
+	print score(predict, mTestY, len(voices))

@@ -37,7 +37,7 @@ def frameSignal(sig, frameLen, step):
 @debug
 def filterBank(frames, rate):
 	for frame in frames:
-		FS.fftfreq(frame.shape[0], d = 1.0/rate)
+		SF.fftfreq(frame.shape[0], d = 1.0/rate)
 		
 
 
