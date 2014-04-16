@@ -36,7 +36,7 @@ def framesig(sig,frame_len,frame_step,winfunc=lambda x:np.ones((1,x))):
     slen = len(sig)
     frame_len = int(frame_len)
     frame_step = int(frame_step)
-    if slen <= frame_len: 
+    if slen <= frame_len:
         numframes = 1
     else:
         numframes = 1 + np.ceil((1.0*slen - frame_len)/frame_step)
